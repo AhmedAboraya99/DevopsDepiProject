@@ -1,0 +1,31 @@
+- name: Deploy Node.js Application
+  hosts: webservers
+  become: yes  # Use sudo to run commands
+  tasks:
+
+    - name: Ensure Docker is installed
+      apt:
+        name: docker-ce
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull Docker image
+      docker_image:
+        name: myapp   # Replace with your image name
+        tag: latest    # Use your desired tag
+        source: pull
+
+    - name: Run Docker container
+      docker_container:
+        name: myapp_container  # Container name
+        image: myapp:latest     # Image name with tag
+        state: started
+        ports:
+          - "3000:3000"  # Map host port to container port
+        restart_policy: unless-stopped
